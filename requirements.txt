@@ -1,20 +1,10 @@
-# Core dependencies
-opencv-python         # For video processing
-pydub                 # For audio processing
-numpy                 # For numerical operations
-
-# Speech-to-Text & Text-to-Speech
-speechrecognition     # Converts speech to text
-pyaudio               # Audio input/output
-gtts                  # Google Text-to-Speech
-transformers          # For AI-based speech models
-
-# OpenAI & LLMs (for chatbot & recommendations)
-openai                # For Generative AI doctor responses
-
-# Flask/FastAPI for Backend
-fastapi               # API framework
-uvicorn               # ASGI server
-
-# Additional Utilities
-python-dotenv         # For environment variables
+fastapi
+uvicorn
+openai
+transformers
+speechrecognition
+pyttsx3
+opencv-python
+numpy
+streamlit
+requests
