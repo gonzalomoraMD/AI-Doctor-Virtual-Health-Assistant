@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-transformers
-torch
-speechrecognition
-pyttsx3
-opencv-python
-numpy
-pydantic
