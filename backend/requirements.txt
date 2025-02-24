@@ -1,7 +1,9 @@
 fastapi
-openai
-whisper
-google-cloud-texttospeech
-aiortc
+uvicorn
+transformers
+torch
+speechrecognition
+pyttsx3
 opencv-python
-requests
+numpy
+pydantic
