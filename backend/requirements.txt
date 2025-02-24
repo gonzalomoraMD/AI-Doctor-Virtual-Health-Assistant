@@ -1,0 +1,7 @@
+fastapi
+openai
+whisper
+google-cloud-texttospeech
+aiortc
+opencv-python
+requests
