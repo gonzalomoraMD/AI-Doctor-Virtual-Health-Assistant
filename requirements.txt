@@ -1,10 +1,13 @@
 fastapi
 uvicorn
 openai
-transformers
+
 speechrecognition
 pyttsx3
-opencv-python
+opencv-python>=4.7.0
+
 numpy
 streamlit
 requests
+torch
+speechbrain

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Doctor Consultation</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        #chatBox { 
+            width: 100%; 
+            height: 400px; 
+            overflow-y: auto; 
+            border: 1px solid #ccc; 
+            border-radius: 8px;
+            padding: 15px; 
+            margin: 20px auto;
+            text-align: left;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .user-message {
+            background-color: #e1f5fe;
+            padding: 10px 15px;
+            border-radius: 18px 18px 0 18px;
+            margin-bottom: 15px;
+            max-width: 70%;
+            margin-left: auto;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .doctor-message {
+            background-color: #f0f4f8;
+            padding: 10px 15px;
+            border-radius: 18px 18px 18px 0;
+            margin-bottom: 15px;
+            max-width: 70%;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .doctor-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #4285f4;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            float: left;
+            margin-top: -5px;
+        }
+        .message-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        .message-content {
+            flex: 1;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        input { 
+            flex-grow: 1;
+            padding: 12px; 
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+        input:focus {
+            border-color: #4285f4;
+        }
+        button { 
+            padding: 12px 20px; 
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        h1 {
+            color: #4285f4;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .status {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .typing-indicator {
+            display: none;
+            margin-bottom: 15px;
+        }
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            float: left;
+            margin: 0 1px;
+            background-color: #9E9E9E;
+            display: block;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+        .typing-indicator span:nth-of-type(1) {
+            animation: 1s blink infinite 0.3333s;
+        }
+        .typing-indicator span:nth-of-type(2) {
+            animation: 1s blink infinite 0.6666s;
+        }
+        .typing-indicator span:nth-of-type(3) {
+            animation: 1s blink infinite 0.9999s;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Virtual Doctor Consultation</h1>
+    <p class="subtitle">Speak with Dr. Sahana Durgekar about your health concerns</p>
+    <p class="status" id="connectionStatus">Connecting to medical service...</p>
+    <div id="chatBox">
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-container">
+                <div class="doctor-avatar">Dr</div>
+                <div class="doctor-message">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-container">
+        <input type="text" id="userInput" placeholder="Describe your symptoms here..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" id="sendButton">Send</button>
+    </div>
+    <script>
+        let chatHistory = [];
+        let backendUrl = "http://127.0.0.1:8000/chat";
+        let connectionStatus = document.getElementById("connectionStatus");
+        let typingIndicator = document.getElementById("typingIndicator");
+        
+        function updateChat(role, message) {
+            let chatBox = document.getElementById("chatBox");
+            
+            if (role === "You") {
+                let messageDiv = document.createElement("div");
+                messageDiv.className = "user-message";
+                messageDiv.textContent = message;
+                chatBox.appendChild(messageDiv);
+            } else {
+                let containerDiv = document.createElement("div");
+                containerDiv.className = "message-container";
+                
+                let avatarDiv = document.createElement("div");
+                avatarDiv.className = "doctor-avatar";
+                avatarDiv.textContent = "Dr";
+                
+                let messageDiv = document.createElement("div");
+                messageDiv.className = "doctor-message";
+                messageDiv.textContent = message;
+                
+                containerDiv.appendChild(avatarDiv);
+                containerDiv.appendChild(messageDiv);
+                
+                chatBox.appendChild(containerDiv);
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            typingIndicator.style.display = "block";
+            let chatBox = document.getElementById("chatBox");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            typingIndicator.style.display = "none";
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+        
+        async function testConnection() {
+            try {
+                let response = await fetch(backendUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify([]),
+                });
+                
+                if (response.ok) {
+                    connectionStatus.textContent = "Connected to medical service";
+                    connectionStatus.style.color = "green";
+                    return true;
+                } else {
+                    connectionStatus.textContent = "Medical service is responding but returned an error";
+                    connectionStatus.style.color = "orange";
+                    return false;
+                }
+            } catch (error) {
+                connectionStatus.textContent = "Cannot connect to medical service. Is the server running?";
+                connectionStatus.style.color = "red";
+                return false;
+            }
+        }
+        
+        async function sendMessage() {
+            let userInput = document.getElementById("userInput").value;
+            let sendButton = document.getElementById("sendButton");
+            
+            if (!userInput.trim()) return;
+            
+            // Disable input while processing
+            document.getElementById("userInput").disabled = true;
+            sendButton.disabled = true;
+            sendButton.textContent = "Sending...";
+            
+            updateChat("You", userInput);
+            chatHistory.push({ role: "user", content: userInput });
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                // Add a small delay to make the typing indicator visible (more realistic)
+                await new Promise(resolve => setTimeout(resolve, 700 + Math.random() * 1500));
+                
+                let response = await fetch(backendUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(chatHistory),
+                });
+                
+                hideTypingIndicator();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                let data = await response.json();
+                let doctorResponse = data.response || "I'm sorry, I didn't quite catch what you're saying. Could you describe your symptoms more clearly?";
+                
+                updateChat("Dr. Sahana Durgekar", doctorResponse);
+                chatHistory.push({ role: "assistant", content: doctorResponse });
+            } catch (error) {
+                hideTypingIndicator();
+                console.error("Error:", error);
+                updateChat("Dr. Sahana Durgekar", "I apologize, but we're experiencing some technical difficulties with our system. Let's try again in a moment.");
+                connectionStatus.textContent = "Connection error. Please check the backend server.";
+                connectionStatus.style.color = "red";
+            } finally {
+                // Re-enable input
+                document.getElementById("userInput").disabled = false;
+                sendButton.disabled = false;
+                sendButton.textContent = "Send";
+                document.getElementById("userInput").value = "";
+                document.getElementById("userInput").focus();
+            }
+        }
+        
+        // AI Doctor starts the conversation
+        window.onload = async () => {
+            let connected = await testConnection();
+            
+            if (connected) {
+                let firstMessage = "Hello, I'm Dr. Sahana Durgekar. How are you feeling today? Please tell me what symptoms you're experiencing.";
+                updateChat("Dr. Sahana Durgekar", firstMessage);
+                chatHistory.push({ role: "assistant", content: firstMessage });
+            } else {
+                updateChat("Dr. Sahana Durgekar", "There seems to be a problem connecting to our medical service. Please refresh the page or try again later.");
+            }
+        };
+    </script>
+</body>
+</html>
